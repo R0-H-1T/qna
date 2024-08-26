@@ -49,7 +49,7 @@ class QuestionnaireTable(SQLModel, table=True):
 class QuestionTable(QuestionBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     options: Optional[List[str | int]] = Field(default=None, sa_column=Column(JSON))
-    questionnaire_id: int | None = Field(default=None, foreign_key="questionnairetable.id")
+    questionnaire_id: Optional[int] = Field(default=None, foreign_key="questionnairetable.id")
     questionnaire: QuestionnaireTable | None = Relationship(back_populates="questions")
 
     # questionnaire_id: Optional[int] = Field(foreign_key="questionaire.id")

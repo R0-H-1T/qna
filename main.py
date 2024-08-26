@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from db import createdb, get_session
 from typing import Annotated
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from models import Questionaire, QuestionnaireTable, TestJson
+from models import Questionaire, QuestionnaireTable, TestJson, QuestionTable
 # for uvi use without period, and for fastapi use with .
 import httpx
 import json
@@ -37,27 +37,20 @@ async def create_question(questionnaire: Questionaire,
     #     )    
     # if r.status_code != 201:
     #     raise HTTPException(status_code=r.status_code, detail='Blah Blah Blah')
-    ch = questionnaire.questions[0].choices
-    x = json.dumps(['welcome', 'reynolds', 34])
-    print(x)
+    # ch = questionnaire.questions[0].choices
     
-    x = TestJson(options=questionnaire.questions[0].choices)
+    db_qna = QuestionnaireTable(title=questionnaire.title)
 
-    session.add(x)
-    session.commit()
-    session.refresh(x)
-    # session.refresh(x)
-
-
-    return {
-        'What i got': x
-    }
+    for questions in questionnaire.questions:
+        db_ques = QuestionTable.model_validate(questions, update={'options': questions.choices, 'questionnaire':db_qna})
+        session.add(db_ques)
+        session.commit()
 
 
 
 @app.get('/testjson', tags=['testjson'], status_code=status.HTTP_200_OK)
 async def test_json(session: Session = Depends(get_session)):
-    db_test =  session.exec(select(TestJson).offset(0).limit(100)).all()
+    db_test =  session.exec(select(QuestionTable).offset(0).limit(100)).all()
     for x in db_test:
         print(x.options, end='\n')    
     return db_test
