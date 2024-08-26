@@ -1,0 +1,6 @@
+The command uvicorn main:app refers to:
+
+main: the file main.py (the Python module).
+app: the object created inside of main.py with the line app = FastAPI().
+It is equivalent to:
+uvicorn main:app --host 0.0.0.0 --port 80
