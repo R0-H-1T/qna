@@ -2,8 +2,15 @@ from pydantic import EmailStr, BaseModel
 from sqlmodel import SQLModel, Field, Column, JSON, Relationship
 from typing import List, Optional
 from uuid import uuid4
+
+
 '''
+Each question in a questionnaire can be either an MCQ or text based.
+
+
+Model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 'questionaireID': <ID>
+'title': <str>
 'questions': [
     {
         'question': <ID>,
@@ -13,11 +20,6 @@ from uuid import uuid4
         'text': <string>
     }
 ]
-
-
-questionaire_id | question_id | 
-
-
 '''
 
 
@@ -26,12 +28,12 @@ class QuestionBase(SQLModel):
     question: str
     correct: int | None = None
     text: str | None = None
-    # choices: Optional[List[str]] = Field(default=None)
 
 
 
 class Question(QuestionBase):
     choices: Optional[List[str | int]] = None
+
 
 
 class Questionaire(SQLModel):
@@ -46,25 +48,13 @@ class QuestionnaireTable(SQLModel, table=True):
     questions: list["QuestionTable"] = Relationship(back_populates="questionnaire")
 
 
+
 class QuestionTable(QuestionBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     options: Optional[List[str | int]] = Field(default=None, sa_column=Column(JSON))
     questionnaire_id: Optional[int] = Field(default=None, foreign_key="questionnairetable.id")
     questionnaire: QuestionnaireTable | None = Relationship(back_populates="questions")
 
-    # questionnaire_id: Optional[int] = Field(foreign_key="questionaire.id")
-    # options: Optional[List[str]] = Field(sa_column=Column(JSON))
-    # questionnaire: Questionaire | None = Relationship(back_populates="questions")
-
-
-
-# class QuestionnnaireTable(SQLModel, table=True):
-#     id: Optional[int] = Field(default=None, primary_key=True)
-    # title: str
-    # questions: List["QuestionTable"] = Relationship(back_populates="questionnairetable")
-
-
-# Question.questionnaire = Relationship(back_populates="questions")
 
 
 class TestJson(SQLModel, table=True):

@@ -1,0 +1,33 @@
+{
+    "title": "C Programming MCQ",
+    "questions": [
+      {
+        "mcq": true,
+        "question": "Who is the father of C language?",
+        "correct": 2,
+        "choices": [
+          "steve", "james", "dennis", "rasmus"
+        ]
+      },
+      {
+        "mcq": false,
+        "question": "Who are you?"
+      },
+      {
+        "mcq": true,
+        "question": "All keywords in C are in",
+        "correct": 2,
+        "choices": [
+          "uppercase", "lowercase", "camelcase", "none"
+        ]
+      },
+      {
+        "mcq": true,
+        "question": "Which of the following cannot be a variable name in C?",
+        "correct": 1,
+        "choices": [
+          "export", "volatile", "true", "friend"
+        ]
+      }
+    ]
+  }
