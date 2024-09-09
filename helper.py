@@ -1,15 +1,24 @@
+import httpx
 from fastapi import HTTPException, status
 
-class MyExceptions:
-    def __init__(self) -> None:
-        pass
 
-    def __call__(self) -> None:
-        pass
+# class Config:
+#     url: str = 'http://localhost:8000/token'
 
-    def create_exception(self) -> HTTPException:
-        return HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={'WWW-Authenticate': 'Bearer'}
+
+
+
+
+async def check_token(scheme: str, credentials: str, end_url: str) -> dict:
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            url=end_url,
+            headers={
+                'Authorization': f'{scheme} {credentials}'}
         )
+
+    if r.status_code != status.HTTP_200_OK:
+        raise HTTPException(status_code=r.status_code)
+    
+    return r.json()
+       

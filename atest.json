@@ -1,0 +1,21 @@
+{
+  "questionnaire_id": 1,
+  "answers": [
+    {
+      "mcq": true,
+      "choice": 3
+    },
+    {
+      "mcq": false,
+      "text": "Im Nicklodeon"
+    },
+    {
+      "mcq": true,
+      "choice": 1
+    },
+    {
+      "mcq": true,
+      "choice": 1
+    }
+  ]
+}
