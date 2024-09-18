@@ -25,14 +25,14 @@ security = HTTPBearer()
 @app.post('/question', tags=['questionnaire'], status_code=status.HTTP_201_CREATED)
 async def create_question(
     questionnaire: Questionaire,
-    # credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: Session = Depends(get_session)
 ):
 
-    # res = await check_token(credentials.scheme, credentials.credentials, 'http://localhost:8000/token')
+    res = await check_token(credentials.scheme, credentials.credentials, 'http://localhost:8000/token')
     
-    # db_qna = QuestionnaireTable(title=questionnaire.title, email=res.get('sub'))
-    db_qna = QuestionnaireTable(title=questionnaire.title, email='remi@example.com')
+    db_qna = QuestionnaireTable(title=questionnaire.title, email=res.get('sub'))
+    # db_qna = QuestionnaireTable(title=questionnaire.title, email='remi@example.com')
  
     try:
         for questions in questionnaire.questions:
@@ -48,7 +48,7 @@ async def create_question(
 @app.post('/answer', tags=['answer'], status_code=status.HTTP_200_OK)
 async def post_answer(
     answers: Answers,
-    # credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: Session = Depends(get_session)
 ):
     questionnaire_id = answers.questionnaire_id
@@ -88,25 +88,17 @@ analytics perform relevent analysis - display to the user.
 1. Data will be big in size to transport - any techs available?
 2. clearance regarding scope in client credential OAuth flow
 
-'''
-# @app.get('/get_qna/{qna_id}', tags=['analytics path'], status_code=status.HTTP_200_OK)
-# async def get_answers(qna_id, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: Session = Depends(get_session)):
-#     res = await check_token(scheme=credentials.scheme, credentials=credentials.credentials, end_url='http://localhost:8000/token')
+'''    
+@app.get('/get_qna/{qna_id}', tags=['get qna'])
+async def get_qna(qna_id, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: Session = Depends(get_session)):
 
-#     statement = select(QuestionnaireTable, QuestionTable).join(QuestionnaireTable).where(QuestionnaireTable.email == res.get('sub'))
-#     result = session.exec(statement)
-#     for ques in result:
-#         print("Here are the questions: ",ques)
-    
+    res = await check_token(credentials.scheme, credentials.credentials, 'http://localhost:8000/token')
 
-@app.get('/test_get_qna/{qna_id}', tags=['get qna'])
-async def get_qna(qna_id, session: Session = Depends(get_session)):
     final_result: dict = {}
 
-    statement = select(QuestionTable).join(QuestionnaireTable).where(QuestionnaireTable.email == 'remi@example.com')
+    statement = select(QuestionTable).join(QuestionnaireTable).where(QuestionnaireTable.email == res.get('sub'))
     result = session.exec(statement)
     # qna_id = result.first().questionnaire_id
-
     qna_ques = []
     for ques in result:
         qna_ques.append({"correct":ques.correct, "mcq": ques.mcq, "qna_id": ques.questionnaire_id, "id": ques.id, "text": ques.text})
