@@ -8,7 +8,12 @@ from app.models import Questionaire, QuestionnaireTable, Answers, QuestionTable,
 # for uvi use without period, and for fastapi use with .
 from app.helper import check_token
 from sqlmodel import Session, select
+from dotenv import load_dotenv
+import os
+from httpx import AsyncClient
 
+
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,7 +23,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="Qna Service")
 security = HTTPBearer()
+url = f"http://{os.environ.get('AUTH_DNS')}" or f"http://localhost:{os.getenv('PORT_NO')}"
 
+@app.get('/auth_service', tags=['test'])
+async def auth_service_test():
+    async with AsyncClient() as client:
+        r = await client.get(url=url)
+
+    return r.json()
+		
 
 
 @app.post('/question', tags=['questionnaire'], status_code=status.HTTP_201_CREATED)
@@ -28,7 +41,7 @@ async def create_question(
     session: Session = Depends(get_session)
 ):
 
-    res = await check_token(credentials.scheme, credentials.credentials, 'http://localhost:8000/token')
+    res = await check_token(credentials.scheme, credentials.credentials, f"{url}/token")
     
     db_qna = QuestionnaireTable(title=questionnaire.title, email=res.get('sub'))
     # db_qna = QuestionnaireTable(title=questionnaire.title, email='remi@example.com')
@@ -52,6 +65,7 @@ async def post_answer(
 ):
     questionnaire_id = answers.questionnaire_id
 
+    res = await check_token(credentials.scheme, credentials.credentials, f"{url}/token")
 
     db_answerstable = AnswersTable(questionnaire_id=questionnaire_id)
     
@@ -91,11 +105,13 @@ analytics perform relevent analysis - display to the user.
 @app.get('/get_qna/{qna_id}', tags=['get qna'])
 async def get_qna(qna_id, credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)], session: Session = Depends(get_session)):
 
-    res = await check_token(credentials.scheme, credentials.credentials, 'http://localhost:8000/token')
+
+    res = await check_token(credentials.scheme, credentials.credentials, f"{url}/token")
 
     final_result: dict = {}
 
-    statement = select(QuestionTable).join(QuestionnaireTable).where(QuestionnaireTable.email == res.get('sub'))
+    # will return all the questionnaires found with the email, add filteration with id
+    statement = select(QuestionTable).join(QuestionnaireTable).where(QuestionnaireTable.email == res.get('sub')).where(QuestionnaireTable.id == qna_id)
     result = session.exec(statement)
     # qna_id = result.first().questionnaire_id
     qna_ques = []
