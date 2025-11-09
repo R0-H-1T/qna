@@ -1,7 +1,8 @@
 from pydantic import EmailStr, BaseModel
 from sqlmodel import SQLModel, Field, Column, JSON, Relationship
 from typing import List, Optional
-from uuid import uuid4
+from app.helper import gen_alphanumeric_str
+from uuid import UUID, uuid4
 
 
 """
@@ -34,8 +35,6 @@ answers: [
     {},
     {}
 ]
-
-
 """
 
 
@@ -51,7 +50,12 @@ class Answer(AnswerBase):
 
 
 class Answers(SQLModel):
-    questionnaire_id: int 
+    """
+    `questionnaire_id` - Id of the questionnaire to which this answer is for.
+
+    `answers` - [mcq, choice, text], [mcq, choice, text], ...  
+    """
+    questionnaire_id: str 
     answers: List[Answer]
 
 
@@ -64,7 +68,7 @@ class QuestionBase(SQLModel):
 
 
 class Question(QuestionBase):
-    choices: Optional[List[str | int]] = None
+    options: Optional[List[str | int]] = None
 
 
 class Questionaire(SQLModel):
@@ -73,47 +77,51 @@ class Questionaire(SQLModel):
 
 
 
-
 class QuestionnaireTable(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    quiz_code: str|None = Field(default_factory=gen_alphanumeric_str, index=True)
     title: str
-    email: EmailStr
-    questions: list["QuestionTable"] = Relationship(back_populates="questionnaire")
-    answers: list["AnswersTable"] | None = Relationship(back_populates="questionnaire")
-# why none ? at the time of creating the questionnaire this might not be present
+    user_id: UUID
+
+    questions: list["QuestionTable"] = Relationship(back_populates="questionnaire", cascade_delete=True)
+    answers: list["AnswersTable"] | None = Relationship(back_populates="questionnaire", cascade_delete=True)
 
 
 
 class QuestionTable(QuestionBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     options: Optional[List[str | int]] = Field(default=None, sa_column=Column(JSON))
-    questionnaire_id: Optional[int] = Field(
-        default=None, foreign_key="questionnairetable.id"
+
+    questionnaire_id: Optional[UUID] = Field(
+        default=None, foreign_key="questionnairetable.id", ondelete="CASCADE" # ondelete for removing all the questions if questionnaire is deleted
     )
     questionnaire: QuestionnaireTable | None = Relationship(back_populates="questions")
 
 
 
 class AnswersTable(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    questionnaire_id: Optional[int] = Field(
-        default=None, foreign_key="questionnairetable.id"
-    )
-    answers: list["AnswerTable"] = Relationship(back_populates="answer")
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID
+
+    questionnaire_id: Optional[UUID] = Field(
+        default=None, foreign_key="questionnairetable.id", ondelete="CASCADE")
     questionnaire: QuestionnaireTable | None = Relationship(back_populates="answers")
+
+    answers: list["AnswerTable"] = Relationship(back_populates="answer", cascade_delete=True)
 
 
 
 class AnswerTable(AnswerBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    answers_id: Optional[int] = Field(default=None, foreign_key="answerstable.id")
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    answers_id: Optional[UUID] = Field(default=None, foreign_key="answerstable.id", ondelete="CASCADE")
+
     answer: AnswersTable | None = Relationship(back_populates="answers")
 
 
 
 
-class TestJson(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    options: Optional[List[str | int]] = Field(default=None, sa_column=Column(JSON))
+# class TestJson(SQLModel, table=True):
+#     id: Optional[int] = Field(default=None, primary_key=True)
+#     options: Optional[List[str | int]] = Field(default=None, sa_column=Column(JSON))
 
 

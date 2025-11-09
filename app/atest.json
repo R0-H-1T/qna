@@ -19,3 +19,36 @@
     }
   ]
 }
+
+
+{
+  "questionnaire_id": "3cc5f35d-edee-4351-ac39-326e008ec952",
+  "answers": [
+    {
+      "mcq": true,
+      "choice": 4
+    },
+    {
+      "mcq": true,
+      "choice": 2
+    },
+    {
+      "mcq": false,
+      "text": "return"
+    },
+    {
+      "mcq": true,
+      "choice": 2
+    }
+  ]
+}
+
+
+[
+  {'title': 'SQL Question', 'quiz_code': '9mqgc', 'id': UUID('0323b469-6f65-44f2-97a8-ba10d9e82d9e')
+  },
+  {'title': 'Python3 Programming', 'quiz_code': 'a19o5', 'id': UUID('51937c79-b530-4005-99ba-86b3835565c8')
+  },
+  {'title': 'SQL Basics', 'quiz_code': '43583', 'id': UUID('3cc5f35d-edee-4351-ac39-326e008ec952')
+  }
+]

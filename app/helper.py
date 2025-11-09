@@ -22,3 +22,7 @@ async def check_token(scheme: str, credentials: str, end_url: str) -> dict:
     
     return r.json()
        
+
+def gen_alphanumeric_str() -> str:
+    import random
+    return ''.join(random.choice('0123456789acegjmoqsvxz') for i in range(5))

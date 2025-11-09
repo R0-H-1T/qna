@@ -4,3 +4,7 @@ main: the file main.py (the Python module).
 app: the object created inside of main.py with the line app = FastAPI().
 It is equivalent to:
 uvicorn main:app --host 0.0.0.0 --port 80
+
+
+The jwt token has a claim - `sub`, that hols the email of the user.
+We are using that email to 
